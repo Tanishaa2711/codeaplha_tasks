@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Gallery</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#111;
+    color:white;
+}
+
+h1{
+    text-align:center;
+    padding:30px 0;
+}
+
+.filters{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.filters button{
+    padding:8px 18px;
+    margin:5px;
+    border:none;
+    border-radius:20px;
+    background:#222;
+    color:white;
+    cursor:pointer;
+}
+
+.filters button.active,
+.filters button:hover{
+    background:#ff9800;
+}
+
+.gallery{
+    column-count:3;
+    column-gap:15px;
+    padding:0 40px 50px;
+}
+
+@media(max-width:900px){
+    .gallery{ column-count:2; }
+}
+
+@media(max-width:600px){
+    .gallery{ column-count:1; }
+}
+
+.gallery-item{
+    margin-bottom:15px;
+    cursor:pointer;
+}
+
+.gallery-item img{
+    width:100%;
+    border-radius:10px;
+    transition:0.3s;
+}
+
+.gallery-item:hover img{
+    transform:scale(1.05);
+}
+
+/* Lightbox */
+.lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.95);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    opacity:0;
+    visibility:hidden;
+    transition:0.4s;
+}
+
+.lightbox.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.lightbox img{
+    max-width:85%;
+    max-height:85%;
+}
+
+.close{
+    position:absolute;
+    top:20px;
+    right:30px;
+    font-size:30px;
+    cursor:pointer;
+}
+
+.nav{
+    position:absolute;
+    bottom:40px;
+}
+
+.nav button{
+    padding:8px 15px;
+    margin:5px;
+    border:none;
+    background:#ff9800;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>My Portfolio Gallery</h1>
+
+<div class="filters">
+    <button class="active" onclick="loadCategory('all', this)">All</button>
+    <button onclick="loadCategory('cars', this)">Cars</button>
+    <button onclick="loadCategory('plants', this)">Plants</button>
+    <button onclick="loadCategory('landscape', this)">Landscape</button>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<div class="lightbox" id="lightbox">
+    <span class="close" onclick="closeLightbox()">✖</span>
+    <img id="lightbox-img">
+    <div class="nav">
+        <button onclick="prevImage()">Prev</button>
+        <button onclick="nextImage()">Next</button>
+    </div>
+</div>
+
+<script>
+const gallery = document.getElementById("gallery");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+let currentImages = [];
+let currentIndex = 0;
+
+/* REAL IMAGE LINKS */
+const categories = {
+    cars: [
+        "https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg",
+        "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg",
+        "https://images.pexels.com/photos/1149831/pexels-photo-1149831.jpeg",
+        "https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg"
+    ],
+    plants: [
+        "https://images.pexels.com/photos/34950/pexels-photo.jpg",
+        "https://images.pexels.com/photos/212324/pexels-photo-212324.jpeg",
+        "https://images.pexels.com/photos/158063/pexels-photo-158063.jpeg",
+        "https://images.pexels.com/photos/807598/pexels-photo-807598.jpeg"
+    ],
+    landscape: [
+        "https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg",
+        "https://images.pexels.com/photos/210186/pexels-photo-210186.jpeg",
+        "https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg",
+        "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg"
+    ]
+};
+
+function loadCategory(category, btn){
+
+    document.querySelectorAll(".filters button")
+    .forEach(b=>b.classList.remove("active"));
+
+    if(btn) btn.classList.add("active");
+
+    gallery.innerHTML="";
+    currentImages=[];
+
+    if(category==="all"){
+        currentImages = [
+            ...categories.cars,
+            ...categories.plants,
+            ...categories.landscape
+        ];
+    } else {
+        currentImages = categories[category];
+    }
+
+    currentImages.forEach((src,index)=>{
+        const div=document.createElement("div");
+        div.className="gallery-item";
+        div.innerHTML=`<img src="${src}">`;
+        div.onclick=()=>openLightbox(index);
+        gallery.appendChild(div);
+    });
+}
+
+function openLightbox(index){
+    currentIndex=index;
+    lightboxImg.src=currentImages[currentIndex];
+    lightbox.classList.add("active");
+}
+
+function closeLightbox(){
+    lightbox.classList.remove("active");
+}
+
+function nextImage(){
+    currentIndex=(currentIndex+1)%currentImages.length;
+    lightboxImg.src=currentImages[currentIndex];
+}
+
+function prevImage(){
+    currentIndex=(currentIndex-1+currentImages.length)%currentImages.length;
+    lightboxImg.src=currentImages[currentIndex];
+}
+
+document.addEventListener("keydown",function(e){
+    if(!lightbox.classList.contains("active")) return;
+
+    if(e.key==="ArrowRight") nextImage();
+    if(e.key==="ArrowLeft") prevImage();
+    if(e.key==="Escape") closeLightbox();
+});
+
+loadCategory("all");
+</script>
+
+</body>
+</html>
